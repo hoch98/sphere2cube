@@ -7,3 +7,5 @@ unfortunately, i have no idea how to apply materials onto it, so rn its just a b
 i bet there is a way more efficient way of doing this but it works and it looks cool
 
 oh yeah, theres also a circle morphing into a cube idk
+
+![alt text](https://i.ibb.co/4tjVqHq/bruh.gif)
