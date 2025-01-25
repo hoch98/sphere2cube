@@ -3,7 +3,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
-const cn = 120;
+const cn = 60;
 const n = cn**2;
 const r = 4;
 const cubeLD2 = 4;
@@ -23,18 +23,21 @@ function d2r(degrees)
 }
 
 function interpolateLists(n1, n2, t) {
-    if (n1.length !== n2.length) {
-        throw new Error("Both lists must have the same length.");
-    }
-
-    if (t < 0 || t > 1) {
-        throw new Error("Interpolation factor 't' must be between 0 and 1.");
-    }
 
     return n1.map((num1, index) => {
         const num2 = n2[index];
-        return num1 * (1 - t) + num2 * t;
+        return num1 + t * (num2-num1);
     });
+}
+
+let easeFunctions = {
+    "linear": (t) => {return t},
+    "quadIn": (t) => {return t**2},
+    "cubicIn": (t) => {return t**3},
+    "sineIn": (t) => {return 1 - Math.cos((t * Math.PI) / 2);},
+    "quadOut": (t) => {return 1 - (1 - t) * (1 - t);},
+    "cubicOut": (t) => {return 1 - Math.pow(1 - t, 3)},
+    "sineOut": (t) => {return Math.sin((t * Math.PI) / 2);},
 }
 
 const sphereGeo = new THREE.BufferGeometry();
@@ -44,6 +47,7 @@ const cubeGeo = new THREE.BufferGeometry();
 // vertices because each vertex needs to appear once per triangle.
 let sphereVertices =[]
 let cubeVertices =[]
+let startingVertices = sphereVertices
 
 for(let i = 0; i < Math.sqrt(n); i++) {
     let x, y, z, Rn;
@@ -57,7 +61,6 @@ for(let i = 0; i < Math.sqrt(n); i++) {
         sphereVertices.push(x)
         sphereVertices.push(y)
         sphereVertices.push(z)
-        sphereGeo.setAttribute( 'position', new THREE.BufferAttribute( new Float32Array(sphereVertices), 3 ) );
     }
 
     if (i == 0 || i == Math.sqrt(n)-1) {
@@ -68,7 +71,6 @@ for(let i = 0; i < Math.sqrt(n); i++) {
             cubeVertices.push(x)
             cubeVertices.push(y)
             cubeVertices.push(z)
-            sphereGeo.setAttribute( 'position', new THREE.BufferAttribute( new Float32Array(sphereVertices), 3 ) );
         }
         // for (let i = 0; i < Math.sqrt(cn); i++) {
         //     for (let j = 0; j < Math.sqrt(cn); j++) {
@@ -109,14 +111,13 @@ for(let i = 0; i < Math.sqrt(n); i++) {
             cubeVertices.push(z)
         }
     }
-    cubeGeo.setAttribute( 'position', new THREE.BufferAttribute( new Float32Array(cubeVertices), 3 ) );
 }
+
+sphereGeo.setAttribute( 'position', new THREE.BufferAttribute( new Float32Array(startingVertices), 3 ) );
 
 const dotMaterial = new THREE.PointsMaterial({ size: 0.1, color: 0x00ff00 });
 const redDotMaterial = new THREE.PointsMaterial({ size: 0.1, color: 0xff0000 });
 const dotSphere = new THREE.Points(sphereGeo, dotMaterial);
-const dotCube = new THREE.Points(cubeGeo, redDotMaterial);
-// scene.add(dotCube);
 scene.add(dotSphere);
 
 camera.position.z = 10;
@@ -124,13 +125,29 @@ camera.position.x = -10;
 controls.update();
 
 let t = 0;
+let sliderTouched = false;
+
+document.getElementById ("pos" ).addEventListener( "input", function (e) {
+
+    sliderTouched = true;
+    t = parseFloat(e.target.value);
+    startingVertices = interpolateLists(sphereVertices, cubeVertices, easeFunctions[document.getElementById("easeIn").value](t));
+    sphereGeo.setAttribute( 'position', new THREE.BufferAttribute( new Float32Array(startingVertices), 3 ) );
+
+} );
+
+document.getElementById("reset").onclick = function () {
+    t = 0
+    sliderTouched = false;
+}
+
 function animate() {
-    if (t < 1) {
-        sphereVertices = interpolateLists(sphereVertices, cubeVertices, t);
-        sphereGeo.setAttribute( 'position', new THREE.BufferAttribute( new Float32Array(sphereVertices), 3 ) );
-        // cubeVertices = interpolateLists(cubeVertices, sphereVertices, t);
-        // cubeGeo.setAttribute( 'position', new THREE.BufferAttribute( new Float32Array(cubeVertices), 3 ) );
-        t = t +0.00005
+    if (t <= 1 && !sliderTouched) {
+        startingVertices = interpolateLists(sphereVertices, cubeVertices, easeFunctions[document.getElementById("easeIn").value](t));
+        sphereGeo.setAttribute( 'position', new THREE.BufferAttribute( new Float32Array(startingVertices), 3 ) );
+        
+        t = t +0.0025
+        document.getElementById ("pos" ).value = t+""
     }
 	renderer.render( scene, camera );
 

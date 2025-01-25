@@ -15,6 +15,19 @@
           }
         }
     </script>
+    <div id="options">
+      <select name="function" id="easeIn">
+        <option value="linear">Linear</option>
+        <option value="quadIn">Quadratic Ease in</option>
+        <option value="cubicIn">Cubic Ease in</option>
+        <option value="sineIn">Sine Ease in</option>
+        <option value="quadOut">Quadratic Ease out</option>
+        <option value="cubicOut">Cubic Ease out</option>
+        <option value="sineOut">Sine Ease out</option>
+      </select>
+      <button id="reset">Reset</button>
+    </div>
+    <input type="range" name="pos" id="pos" min="0" max="1" step ="0.000001" value="0"/>
     <script type="module" src="js/3d.js"></script>
 </body>
 </html>

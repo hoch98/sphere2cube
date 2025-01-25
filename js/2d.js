@@ -28,9 +28,6 @@ function d2r(degrees)
   return degrees * (pi/180);
 }
 
-function easeInCubic(x) {
-    return x * x * x;
-}
 
 
 ctx.fillRect(x, y,4,4);
@@ -96,7 +93,6 @@ var progress = 0
 ctx.beginPath();
 function animate() {
     if (progress < 0.95) {
-        console.log("done") 
         progress += 0.005
     }
     canvas.width = canvas.width; // resets canvas, clearRect doesn't work in this case for sm reason
