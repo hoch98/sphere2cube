@@ -80,8 +80,8 @@ var progress = 0
 ctx.beginPath();
 function animate() {
   console.log(progress)
-    if (progress < 0.75) {
-        progress += 0.1
+    if (progress < 1) {
+        progress += 0.05
     }
     canvas.width = canvas.width; // resets canvas, clearRect doesn't work in this case for sm reason
     for (let i = 0; i < n; i++) {
