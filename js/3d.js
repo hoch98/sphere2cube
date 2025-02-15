@@ -3,7 +3,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
-const cn = 60;
+const cn = 36;
 const n = cn**2;
 const r = 4;
 const cubeLD2 = 4;
@@ -41,7 +41,6 @@ let easeFunctions = {
 }
 
 const sphereGeo = new THREE.BufferGeometry();
-const cubeGeo = new THREE.BufferGeometry();
 
 // create a simple square shape. We duplicate the top left and bottom right
 // vertices because each vertex needs to appear once per triangle.
@@ -56,21 +55,35 @@ for(let i = 0; i < Math.sqrt(n); i++) {
     y = 0
     for (let j = 0; j < Math.sqrt(n); j++) {
         Rn = r*Math.sin(d2r(180*i/Math.sqrt(n)))
-        x = Rn*Math.cos(d2r(360*j/Math.sqrt(n))-45)
-        y = Rn*Math.sin(d2r(360*j/Math.sqrt(n))-45)
+        if (i == Math.sqrt(n)-1) {
+            Rn = 0
+        }
+        x = Rn*Math.cos(d2r(45-360*j/Math.sqrt(n)))
+        y = Rn*Math.sin(d2r(45-360*j/Math.sqrt(n)))
         sphereVertices.push(x)
         sphereVertices.push(y)
         sphereVertices.push(z)
     }
 
     if (i == 0 || i == Math.sqrt(n)-1) {
-        Rn = r*3/4
-        for (let j = 0; j < Math.sqrt(n); j++) {
-            x = Rn*Math.cos(d2r(360*j/Math.sqrt(n))-45)
-            y = Rn*Math.sin(d2r(360*j/Math.sqrt(n))-45)
-            cubeVertices.push(x)
-            cubeVertices.push(y)
-            cubeVertices.push(z)
+        // Rn = r*3/4
+        // for (let j = 0; j < Math.sqrt(n); j++) {
+        //     x = Rn*Math.cos(d2r(360*j/Math.sqrt(n))-45)
+        //     y = Rn*Math.sin(d2r(360*j/Math.sqrt(n))-45)
+        //     cubeVertices.push(x)
+        //     cubeVertices.push(y)
+        //     cubeVertices.push(z)
+        // }
+        
+        let sn = Math.sqrt(Math.sqrt(n))
+        for (let j = 0; j < sn; j++) {
+            let topMargin = (j+1)*r*2/(sn+1)
+            for (let k = 0; k < sn; k++) {
+                let leftMargin = (k+1)*r*2/(sn+1)
+                cubeVertices.push(-r+topMargin)
+                cubeVertices.push(-r+leftMargin)
+                cubeVertices.push(z)
+            }
         }
         // for (let i = 0; i < Math.sqrt(cn); i++) {
         //     for (let j = 0; j < Math.sqrt(cn); j++) {
@@ -84,28 +97,28 @@ for(let i = 0; i < Math.sqrt(n); i++) {
     } else {
         for (let i = 0; i < cn/4; i++) {
             x = cubeLD2
-            y = -cubeLD2+2*cubeLD2*(4*i/cn)
+            y = cubeLD2-2*cubeLD2*(4*i/cn)
             cubeVertices.push(x)
             cubeVertices.push(y)
             cubeVertices.push(z)
         }
         for (let i = cn/4; i < cn/2; i++) {
             x = cubeLD2-2*cubeLD2*((4*i-cn)/cn)
-            y = cubeLD2
+            y = -cubeLD2
             cubeVertices.push(x)
             cubeVertices.push(y)
             cubeVertices.push(z)
         }
         for (let i = cn/2; i < cn*3/4; i++) {
             x = -cubeLD2
-            y = cubeLD2-2*cubeLD2*((4*i-2*cn)/cn)
+            y = -cubeLD2+2*cubeLD2*((4*i-2*cn)/cn)
             cubeVertices.push(x)
             cubeVertices.push(y)
             cubeVertices.push(z)
         }
         for (let i = cn*3/4; i < cn; i++) {
             x = -cubeLD2+2*cubeLD2*((4*i-3*cn)/cn)
-            y = -cubeLD2
+            y = cubeLD2
             cubeVertices.push(x)
             cubeVertices.push(y)
             cubeVertices.push(z)
