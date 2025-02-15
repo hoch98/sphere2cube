@@ -3,7 +3,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
-const cn = 36;
+const cn = 8**2;
 const n = cn**2;
 const r = 4;
 const cubeLD2 = 4;
