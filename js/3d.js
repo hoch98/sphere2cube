@@ -3,9 +3,10 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
-const cn = 8**2;
-const n = cn**2;
-const r = 4;
+let bbn = 4;
+let cn = bbn**2;
+let n = cn**2;
+let r = 4;
 const cubeLD2 = 4;
 
 const renderer = new THREE.WebGLRenderer({antialias: true});
@@ -40,98 +41,89 @@ let easeFunctions = {
     "sineOut": (t) => {return Math.sin((t * Math.PI) / 2);},
 }
 
-const sphereGeo = new THREE.BufferGeometry();
-
-// create a simple square shape. We duplicate the top left and bottom right
-// vertices because each vertex needs to appear once per triangle.
+let sphereGeo
 let sphereVertices =[]
 let cubeVertices =[]
 let startingVertices = sphereVertices
+const dotMaterial = new THREE.PointsMaterial({ size: 0.1, color: 0x00ff00 });
+let dotSphere;
 
-for(let i = 0; i < Math.sqrt(n); i++) {
-    let x, y, z, Rn;
-    x = 0
-    z = r*Math.sin(d2r(180*i/Math.sqrt(n)-90))
-    y = 0
-    for (let j = 0; j < Math.sqrt(n); j++) {
-        Rn = r*Math.sin(d2r(180*i/Math.sqrt(n)))
-        if (i == Math.sqrt(n)-1) {
-            Rn = 0
+// create a simple square shape. We duplicate the top left and bottom right
+// vertices because each vertex needs to appear once per triangle.
+
+function processVertices() {
+    sphereGeo = new THREE.BufferGeometry();
+    sphereVertices =[]
+    cubeVertices =[]
+    startingVertices = sphereVertices
+
+    for(let i = 0; i < Math.sqrt(n); i++) {
+        let x, y, z, Rn;
+        x = 0
+        z = r*Math.sin(d2r(180*i/Math.sqrt(n)-90))
+        y = 0
+        for (let j = 0; j < Math.sqrt(n); j++) {
+            Rn = r*Math.sin(d2r(180*i/Math.sqrt(n)))
+            if (i == Math.sqrt(n)-1) {
+                Rn = 0
+            }
+            x = Rn*Math.cos(d2r(45-360*j/Math.sqrt(n)))
+            y = Rn*Math.sin(d2r(45-360*j/Math.sqrt(n)))
+            sphereVertices.push(x)
+            sphereVertices.push(y)
+            sphereVertices.push(z)
         }
-        x = Rn*Math.cos(d2r(45-360*j/Math.sqrt(n)))
-        y = Rn*Math.sin(d2r(45-360*j/Math.sqrt(n)))
-        sphereVertices.push(x)
-        sphereVertices.push(y)
-        sphereVertices.push(z)
-    }
 
-    if (i == 0 || i == Math.sqrt(n)-1) {
-        // Rn = r*3/4
-        // for (let j = 0; j < Math.sqrt(n); j++) {
-        //     x = Rn*Math.cos(d2r(360*j/Math.sqrt(n))-45)
-        //     y = Rn*Math.sin(d2r(360*j/Math.sqrt(n))-45)
-        //     cubeVertices.push(x)
-        //     cubeVertices.push(y)
-        //     cubeVertices.push(z)
-        // }
-        
-        let sn = Math.sqrt(Math.sqrt(n))
-        for (let j = 0; j < sn; j++) {
-            let topMargin = (j+1)*r*2/(sn+1)
-            for (let k = 0; k < sn; k++) {
-                let leftMargin = (k+1)*r*2/(sn+1)
-                cubeVertices.push(-r+topMargin)
-                cubeVertices.push(-r+leftMargin)
+        if (i == 0 || i == Math.sqrt(n)-1) {
+            
+            let sn = Math.sqrt(Math.sqrt(n))
+            for (let j = 0; j < sn; j++) {
+                let topMargin = (j+1)*r*2/(sn+1)
+                for (let k = 0; k < sn; k++) {
+                    let leftMargin = (k+1)*r*2/(sn+1)
+                    cubeVertices.push(-r+topMargin)
+                    cubeVertices.push(-r+leftMargin)
+                    cubeVertices.push(z)
+                }
+            }
+        } else {
+            for (let i = 0; i < cn/4; i++) {
+                x = cubeLD2
+                y = cubeLD2-2*cubeLD2*(4*i/cn)
+                cubeVertices.push(x)
+                cubeVertices.push(y)
+                cubeVertices.push(z)
+            }
+            for (let i = cn/4; i < cn/2; i++) {
+                x = cubeLD2-2*cubeLD2*((4*i-cn)/cn)
+                y = -cubeLD2
+                cubeVertices.push(x)
+                cubeVertices.push(y)
+                cubeVertices.push(z)
+            }
+            for (let i = cn/2; i < cn*3/4; i++) {
+                x = -cubeLD2
+                y = -cubeLD2+2*cubeLD2*((4*i-2*cn)/cn)
+                cubeVertices.push(x)
+                cubeVertices.push(y)
+                cubeVertices.push(z)
+            }
+            for (let i = cn*3/4; i < cn; i++) {
+                x = -cubeLD2+2*cubeLD2*((4*i-3*cn)/cn)
+                y = cubeLD2
+                cubeVertices.push(x)
+                cubeVertices.push(y)
                 cubeVertices.push(z)
             }
         }
-        // for (let i = 0; i < Math.sqrt(cn); i++) {
-        //     for (let j = 0; j < Math.sqrt(cn); j++) {
-        //         x = cubeLD2-2*cubeLD2*(i/Math.sqrt(cn))
-        //         y = -cubeLD2+2*cubeLD2*(j/Math.sqrt(cn))
-        //         cubeVertices.push(x)
-        //         cubeVertices.push(y)
-        //         cubeVertices.push(z)
-        //     }
-        // }
-    } else {
-        for (let i = 0; i < cn/4; i++) {
-            x = cubeLD2
-            y = cubeLD2-2*cubeLD2*(4*i/cn)
-            cubeVertices.push(x)
-            cubeVertices.push(y)
-            cubeVertices.push(z)
-        }
-        for (let i = cn/4; i < cn/2; i++) {
-            x = cubeLD2-2*cubeLD2*((4*i-cn)/cn)
-            y = -cubeLD2
-            cubeVertices.push(x)
-            cubeVertices.push(y)
-            cubeVertices.push(z)
-        }
-        for (let i = cn/2; i < cn*3/4; i++) {
-            x = -cubeLD2
-            y = -cubeLD2+2*cubeLD2*((4*i-2*cn)/cn)
-            cubeVertices.push(x)
-            cubeVertices.push(y)
-            cubeVertices.push(z)
-        }
-        for (let i = cn*3/4; i < cn; i++) {
-            x = -cubeLD2+2*cubeLD2*((4*i-3*cn)/cn)
-            y = cubeLD2
-            cubeVertices.push(x)
-            cubeVertices.push(y)
-            cubeVertices.push(z)
-        }
     }
+
+    sphereGeo.setAttribute( 'position', new THREE.BufferAttribute( new Float32Array(startingVertices), 3 ) );
+    dotSphere = new THREE.Points(sphereGeo, dotMaterial);
+    scene.add(dotSphere);
 }
 
-sphereGeo.setAttribute( 'position', new THREE.BufferAttribute( new Float32Array(startingVertices), 3 ) );
-
-const dotMaterial = new THREE.PointsMaterial({ size: 0.1, color: 0x00ff00 });
-const redDotMaterial = new THREE.PointsMaterial({ size: 0.1, color: 0xff0000 });
-const dotSphere = new THREE.Points(sphereGeo, dotMaterial);
-scene.add(dotSphere);
+processVertices()
 
 camera.position.z = 10;
 camera.position.x = -10;
@@ -140,27 +132,57 @@ controls.update();
 let t = 0;
 let sliderTouched = false;
 
-document.getElementById ("pos" ).addEventListener( "input", function (e) {
+const GUI = lil.GUI;
+const gui = new GUI();
 
+let obj = {
+    t: 0,
+    "sqrt(sqrt(n))": 4,
+    reset: function() {
+        t = 0
+        sliderTouched = false;
+    },
+    "ease in function": "linear"
+}
+
+let listener = gui.add(obj, "t", 0, 1, 0.01).onChange(value => {
     sliderTouched = true;
-    t = parseFloat(e.target.value);
-    startingVertices = interpolateLists(sphereVertices, cubeVertices, easeFunctions[document.getElementById("easeIn").value](t));
+    t = value
+    startingVertices = interpolateLists(sphereVertices, cubeVertices, easeFunctions[obj['ease in function']](t));
     sphereGeo.setAttribute( 'position', new THREE.BufferAttribute( new Float32Array(startingVertices), 3 ) );
+});
+gui.add(obj, "sqrt(sqrt(n))", 4, 12, 2).onChange(value => {
+    sliderTouched = true
+    bbn = value
+    cn = bbn**2
+    n = cn**2
+    scene.remove(dotSphere)
+    processVertices()
+    obj.reset()
+});
+gui.add(obj, "ease in function", ["linear", "quadIn", "cubicIn", "sineIn", "quadOut", "cubicOut", "sineOut"])
+gui.add(obj, "reset")
+gui.open()
 
-} );
+window.addEventListener( 'resize', onWindowResize, false );
 
-document.getElementById("reset").onclick = function () {
-    t = 0
-    sliderTouched = false;
+function onWindowResize(){
+
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+
+    renderer.setSize( window.innerWidth, window.innerHeight );
+
 }
 
 function animate() {
     if (t <= 1 && !sliderTouched) {
-        startingVertices = interpolateLists(sphereVertices, cubeVertices, easeFunctions[document.getElementById("easeIn").value](t));
+        startingVertices = interpolateLists(sphereVertices, cubeVertices, easeFunctions[obj['ease in function']](t));
         sphereGeo.setAttribute( 'position', new THREE.BufferAttribute( new Float32Array(startingVertices), 3 ) );
         
         t = t +0.0025
-        document.getElementById ("pos" ).value = t+""
+        obj.t = Math.round(t * 100) / 100
+        listener.listen()
     }
 	renderer.render( scene, camera );
 
