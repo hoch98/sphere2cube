@@ -8,4 +8,4 @@ i bet there is a way more efficient way of doing this but it works and it looks 
 
 oh yeah, theres also a circle morphing into a cube idk
 
-![alt text](https://i.ibb.co/4tjVqHq/bruh.gif)
+![alt text](https://raw.githubusercontent.com/hoch98/sphere2cube/refs/heads/main/demo.png)
