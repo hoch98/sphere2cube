@@ -1,6 +1,6 @@
 # Morph sphere to cube
 
-i watched the [veil] MV and the first animation was of a sphere morphing into a cube so i made it
+i watched a music video and it had an animation of a sphere morphing into a cube so i made it
 
 you can also enable the solid material on the live demo
 
